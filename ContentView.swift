@@ -31,7 +31,11 @@ struct ContentView: View {
         }
         .padding()
         .task {
-            
+            do {
+                catImg = try await getImgCat()
+            } catch NetworkError.invalidResponse {
+                print("Invalid Response")
+            }
         }
         
     }
