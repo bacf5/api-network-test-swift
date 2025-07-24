@@ -10,6 +10,7 @@ import SwiftUI
 
 struct ContentView: View {
     @State private var catImg: URL?
+    @State private var catFact: Facts?
 
     
     var body: some View {
@@ -19,6 +20,7 @@ struct ContentView: View {
                 AsyncImage(url: catImg) { image in
                     image
                         .resizable()
+                        .scaledToFit()
                         .aspectRatio(contentMode: .fit)
                     
                 }
@@ -30,11 +32,15 @@ struct ContentView: View {
                 .frame(width: 200, height: 200)
             }
             
-            
-            
             Text("Facts")
                 .bold()
                 .font(.title2)
+            
+            
+            
+            
+//            ForEach(library.bookTitles, id: \.self) { title in
+//                                    Text(title)
             
             Text("Success or not")
             
@@ -45,6 +51,8 @@ struct ContentView: View {
         .task {
             do {
                 catImg = try await getImgCat()
+                catFact = try await getFactsCat()
+                
             } catch NetworkError.invalidUrl {
                 print("Invalid URL")
             } catch NetworkError.invalidData {
@@ -65,25 +73,26 @@ struct ContentView: View {
         }
         
         return url
-        
-//        var request = URLRequest(url: url)
-////        request.httpMethod = "GET"
-//        request.setValue("application/json", forHTTPHeaderField: "Accept")
-        
-//        let (data, response) = try await URLSession.shared.data(from: url)
-        
-//        guard let response = response as? HTTPURLResponse, response.statusCode == 200 else {
-//            throw NetworkError.invalidResponse
-//        }
-//        
-//        do {
-//            let decoder = JSONDecoder()
-//            return try decoder.decode(Cats.self, from: data)
-//        } catch {
-//            throw NetworkError.invalidData
-//        }
     }
-//
+    
+    func getFactsCat() async throws -> Facts {
+        let catFactUrl = URL(string: "https://meowfacts.herokuapp.com/")!
+        
+        
+        
+//        guard let url = URL(string: "https://meowfacts.herokuapp.com/") else {
+//            throw NetworkError.invalidUrl
+//        }
+        
+        let (data, response) = try await URLSession.shared.data(from: catFactUrl)
+        
+        let decoder = JSONDecoder()
+        
+        let catFact = try decoder.decode(Facts.self, from: data)
+        
+        return catFact
+        
+    }
 }
 
 #Preview {
@@ -96,10 +105,17 @@ struct ContentView: View {
 //    let url: String
 //}
 
+struct Facts: Decodable {
+    let facts: [String]
+    let success: String
+}
+
 enum NetworkError: Error {
     case invalidUrl
     case invalidResponse
     case invalidData
 }
+
+
 
 
