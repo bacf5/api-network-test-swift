@@ -40,21 +40,7 @@ struct ContentView: View {
                 Text("Loading your cat fact...")
                     .italic()
             }
-            
-            
-            
-//            if let catFact = catFact {
-//                Text(catFact.data.first ?? "No fact found")
-//                    .bold()
-//                    .font(.title2)
-//            } else {
-//                Text("Loading cat fact...")
-//                    .italic()
-//            }
-            
-            Text("Success or not")
-            
-            
+
             Spacer()
             
         }
@@ -117,8 +103,6 @@ struct Facts: Decodable {
     let data: [String]
 //    let success: String
 }
-
-
 
 enum NetworkError: Error {
     case invalidUrl
