@@ -9,8 +9,8 @@ import SwiftUI
 
 
 struct ContentView: View {
-    @State private var catImg: URL?
-    @State private var catFact: Facts?
+    @State var catImg: URL?
+    @State var catFact: Facts?
 
     
     var body: some View {
@@ -32,17 +32,28 @@ struct ContentView: View {
                 .frame(width: 200, height: 200)
             }
             
-            Text("Facts")
-                .bold()
-                .font(.title2)
+            if let catFact = catFact {
+                Text(catFact.data.first ?? "No fact found")
+                    .bold()
+                
+            } else {
+                Text("Loading your cat fact...")
+                    .italic()
+            }
             
             
             
-            
-//            ForEach(library.bookTitles, id: \.self) { title in
-//                                    Text(title)
+//            if let catFact = catFact {
+//                Text(catFact.data.first ?? "No fact found")
+//                    .bold()
+//                    .font(.title2)
+//            } else {
+//                Text("Loading cat fact...")
+//                    .italic()
+//            }
             
             Text("Success or not")
+            
             
             Spacer()
             
@@ -78,19 +89,16 @@ struct ContentView: View {
     func getFactsCat() async throws -> Facts {
         let catFactUrl = URL(string: "https://meowfacts.herokuapp.com/")!
         
-        
-        
-//        guard let url = URL(string: "https://meowfacts.herokuapp.com/") else {
-//            throw NetworkError.invalidUrl
-//        }
-        
         let (data, response) = try await URLSession.shared.data(from: catFactUrl)
         
-        let decoder = JSONDecoder()
+        guard let response = response as? HTTPURLResponse, response.statusCode == 200 else {
+            throw NetworkError.invalidResponse
+        }
         
-        let catFact = try decoder.decode(Facts.self, from: data)
+        let fact = try JSONDecoder().decode(Facts.self, from: data)
         
-        return catFact
+        return fact
+ 
         
     }
 }
@@ -106,9 +114,11 @@ struct ContentView: View {
 //}
 
 struct Facts: Decodable {
-    let facts: [String]
-    let success: String
+    let data: [String]
+//    let success: String
 }
+
+
 
 enum NetworkError: Error {
     case invalidUrl
