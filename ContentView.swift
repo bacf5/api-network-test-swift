@@ -10,7 +10,9 @@ import SwiftUI
 
 struct ContentView: View {
     @State var catImg: URL?
-    @State var catFact: Facts?
+    @State var catFact: CatFacts?
+    @State var dogImg: DogImg?
+    @State var dogFact: DogFacts?
 
     
     var body: some View {
@@ -40,6 +42,36 @@ struct ContentView: View {
                 Text("Loading your cat fact...")
                     .italic()
             }
+            
+            Spacer()
+            
+//            if let dogImg = DogImg? {}
+//                placeholder: {
+//                    Rectangle()
+//                        .foregroundColor(.secondary)
+//                    
+//                }
+//                .frame(width: 200, height: 200)
+//            }
+//            Text("\(dogImg?.message)")
+            
+            if let dogImg = dogImg {
+                AsyncImage(url: URL(string: dogImg.message)) { image in
+                    image
+                        .resizable()
+                        .scaledToFit()
+                        .aspectRatio(contentMode: .fit)
+                    
+                } placeholder: {
+                    Rectangle()
+                        .foregroundColor(.secondary)
+                    
+                }
+                .frame(width: 200, height: 200)
+                    
+            }
+            
+            Text("Cool Fact perrito")
 
             Spacer()
             
@@ -49,6 +81,8 @@ struct ContentView: View {
             do {
                 catImg = try await getImgCat()
                 catFact = try await getFactsCat()
+                dogImg = try await getImgDog()
+                dogFact = try await getFactsDog()
                 
             } catch NetworkError.invalidUrl {
                 print("Invalid URL")
@@ -72,7 +106,7 @@ struct ContentView: View {
         return url
     }
     
-    func getFactsCat() async throws -> Facts {
+    func getFactsCat() async throws -> CatFacts {
         let catFactUrl = URL(string: "https://meowfacts.herokuapp.com/")!
         
         let (data, response) = try await URLSession.shared.data(from: catFactUrl)
@@ -81,11 +115,39 @@ struct ContentView: View {
             throw NetworkError.invalidResponse
         }
         
-        let fact = try JSONDecoder().decode(Facts.self, from: data)
+        let fact = try JSONDecoder().decode(CatFacts.self, from: data)
         
         return fact
  
         
+    }
+    
+    func getImgDog() async throws -> DogImg {
+        let dogImgURL = URL(string: "https://dog.ceo/api/breeds/image/random")!
+        
+        let (data, response) = try await URLSession.shared.data(from: dogImgURL)
+        
+        guard let response = response as? HTTPURLResponse, response.statusCode == 200 else {
+            throw NetworkError.invalidResponse
+        }
+        
+        let imageDog = try JSONDecoder().decode(DogImg.self, from: data)
+        
+        return imageDog
+    }
+    
+    func getFactsDog() async throws -> DogFacts {
+        let dogFactUrl = URL(string: "https://dogapi.dog/api/facts")!
+        
+        let (data, response) = try await URLSession.shared.data(from: dogFactUrl)
+        
+        guard let response = response as? HTTPURLResponse, response.statusCode == 200 else {
+            throw NetworkError.invalidResponse
+        }
+        
+        let fact = try JSONDecoder().decode(DogFacts.self, from: data)
+        
+        return fact
     }
 }
 
@@ -99,9 +161,17 @@ struct ContentView: View {
 //    let url: String
 //}
 
-struct Facts: Decodable {
+struct CatFacts: Decodable {
     let data: [String]
 //    let success: String
+}
+
+struct DogImg: Decodable {
+    let message: String
+}
+
+struct DogFacts: Decodable {
+    let facts: [String]
 }
 
 enum NetworkError: Error {
