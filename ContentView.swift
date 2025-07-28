@@ -45,15 +45,15 @@ struct ContentView: View {
             
             Spacer()
             
-//            if let dogImg = DogImg? {}
-//                placeholder: {
-//                    Rectangle()
-//                        .foregroundColor(.secondary)
-//                    
-//                }
-//                .frame(width: 200, height: 200)
-//            }
-//            Text("\(dogImg?.message)")
+            //            if let dogImg = DogImg? {}
+            //                placeholder: {
+            //                    Rectangle()
+            //                        .foregroundColor(.secondary)
+            //                    
+            //                }
+            //                .frame(width: 200, height: 200)
+            //            }
+            //            Text("\(dogImg?.message)")
             
             if let dogImg = dogImg {
                 AsyncImage(url: URL(string: dogImg.message)) { image in
@@ -71,8 +71,14 @@ struct ContentView: View {
                     
             }
             
-            Text("Cool Fact perrito")
-
+            if let dogFact = dogFact {
+                Text(dogFact.facts.first ?? "No doggie facto found")
+                    .bold()
+            } else {
+                Text("Loading doggie fact")
+                    .italic()
+            }
+        
             Spacer()
             
         }
@@ -109,7 +115,9 @@ struct ContentView: View {
     func getFactsCat() async throws -> CatFacts {
         let catFactUrl = URL(string: "https://meowfacts.herokuapp.com/")!
         
-        let (data, response) = try await URLSession.shared.data(from: catFactUrl)
+        let (data, response) = try await URLSession.shared.data(
+            from: catFactUrl
+        )
         
         guard let response = response as? HTTPURLResponse, response.statusCode == 200 else {
             throw NetworkError.invalidResponse
@@ -139,7 +147,9 @@ struct ContentView: View {
     func getFactsDog() async throws -> DogFacts {
         let dogFactUrl = URL(string: "https://dogapi.dog/api/facts")!
         
-        let (data, response) = try await URLSession.shared.data(from: dogFactUrl)
+        let (data, response) = try await URLSession.shared.data(
+            from: dogFactUrl
+        )
         
         guard let response = response as? HTTPURLResponse, response.statusCode == 200 else {
             throw NetworkError.invalidResponse
@@ -163,7 +173,7 @@ struct ContentView: View {
 
 struct CatFacts: Decodable {
     let data: [String]
-//    let success: String
+    //    let success: String
 }
 
 struct DogImg: Decodable {
